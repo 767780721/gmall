@@ -19,13 +19,6 @@
     <modules>
         <module>gmall-admin</module>
         <module>gmall-common</module>
-<!--        <module>gmall-sms-interface</module>-->
-<!--        <module>gmall-search</module>-->
-<!--        <module>gmall-pms-interface</module>-->
-<!--        <module>gmall-wms-interface</module>-->
-<!--        <module>gmall-ums-interface</module>-->
-<!--        <module>gmall-cart-interface</module>-->
-<!--        <module>gmall-oms-interface</module>-->
     </modules>
 
     <properties>
@@ -76,6 +69,7 @@
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatisplus.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
