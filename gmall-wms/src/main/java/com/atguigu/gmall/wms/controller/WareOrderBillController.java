@@ -1,8 +1,7 @@
-package com.atguigu.gmall.pms.controller;
+package com.atguigu.gmall.wms.controller;
 
 import java.util.List;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,43 +13,34 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atguigu.gmall.pms.entity.CategoryEntity;
-import com.atguigu.gmall.pms.service.CategoryService;
+import com.atguigu.gmall.wms.entity.WareOrderBillEntity;
+import com.atguigu.gmall.wms.service.WareOrderBillService;
 import com.atguigu.gmall.common.bean.PageResultVo;
 import com.atguigu.gmall.common.bean.ResponseVo;
 import com.atguigu.gmall.common.bean.PageParamVo;
 
 /**
- * 商品三级分类
+ * 库存工作单
  *
  * @author fengge
  * @email fengge@atguigu.com
- * @date 2020-08-21 17:46:22
+ * @date 2020-08-23 20:55:44
  */
-@Api(tags = "商品三级分类 管理")
+@Api(tags = "库存工作单 管理")
 @RestController
-@RequestMapping("pms/category")
-public class CategoryController {
+@RequestMapping("wms/wareorderbill")
+public class WareOrderBillController {
 
     @Autowired
-    private CategoryService categoryService;
+    private WareOrderBillService wareOrderBillService;
 
-    @GetMapping("parent/{parentId}")
-    public ResponseVo<List<CategoryEntity>> queryCategoriesByPid(@PathVariable("parentId") Long pid){
-        QueryWrapper<CategoryEntity> queryWrapper = new QueryWrapper<>();
-        if(pid != -1){
-            queryWrapper.eq("parent_id",pid);
-        }
-        List<CategoryEntity> categoryEntities = categoryService.list(queryWrapper);
-        return ResponseVo.ok(categoryEntities);
-    }
     /**
      * 列表
      */
     @GetMapping
     @ApiOperation("分页查询")
-    public ResponseVo<PageResultVo> queryCategoryByPage(PageParamVo paramVo){
-        PageResultVo pageResultVo = categoryService.queryPage(paramVo);
+    public ResponseVo<PageResultVo> queryWareOrderBillByPage(PageParamVo paramVo){
+        PageResultVo pageResultVo = wareOrderBillService.queryPage(paramVo);
 
         return ResponseVo.ok(pageResultVo);
     }
@@ -61,10 +51,10 @@ public class CategoryController {
      */
     @GetMapping("{id}")
     @ApiOperation("详情查询")
-    public ResponseVo<CategoryEntity> queryCategoryById(@PathVariable("id") Long id){
-		CategoryEntity category = categoryService.getById(id);
+    public ResponseVo<WareOrderBillEntity> queryWareOrderBillById(@PathVariable("id") Long id){
+		WareOrderBillEntity wareOrderBill = wareOrderBillService.getById(id);
 
-        return ResponseVo.ok(category);
+        return ResponseVo.ok(wareOrderBill);
     }
 
     /**
@@ -72,8 +62,8 @@ public class CategoryController {
      */
     @PostMapping
     @ApiOperation("保存")
-    public ResponseVo<Object> save(@RequestBody CategoryEntity category){
-		categoryService.save(category);
+    public ResponseVo<Object> save(@RequestBody WareOrderBillEntity wareOrderBill){
+		wareOrderBillService.save(wareOrderBill);
 
         return ResponseVo.ok();
     }
@@ -83,8 +73,8 @@ public class CategoryController {
      */
     @PostMapping("/update")
     @ApiOperation("修改")
-    public ResponseVo update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+    public ResponseVo update(@RequestBody WareOrderBillEntity wareOrderBill){
+		wareOrderBillService.updateById(wareOrderBill);
 
         return ResponseVo.ok();
     }
@@ -95,7 +85,7 @@ public class CategoryController {
     @PostMapping("/delete")
     @ApiOperation("删除")
     public ResponseVo delete(@RequestBody List<Long> ids){
-		categoryService.removeByIds(ids);
+		wareOrderBillService.removeByIds(ids);
 
         return ResponseVo.ok();
     }

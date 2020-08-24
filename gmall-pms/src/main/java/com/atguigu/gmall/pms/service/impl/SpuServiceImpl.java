@@ -1,5 +1,6 @@
 package com.atguigu.gmall.pms.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,6 +25,26 @@ public class SpuServiceImpl extends ServiceImpl<SpuMapper, SpuEntity> implements
         );
 
         return new PageResultVo(page);
+    }
+
+    @Override
+    public PageResultVo spuByCidPage(Long cid, PageParamVo pageParamVo) {
+        QueryWrapper<SpuEntity> queryWrapper = new QueryWrapper<>();
+        if(cid != 0){
+            queryWrapper.eq("category_id",cid);
+        }
+        String key = pageParamVo.getKey();
+        if(StringUtils.isNotBlank(key)){
+            queryWrapper.and(t ->  t.eq("id",key).or().like("name",key));
+        }
+
+        IPage<SpuEntity> page = this.page(
+                pageParamVo.getPage(),
+                queryWrapper
+        );
+
+        return new PageResultVo(page);
+
     }
 
 }

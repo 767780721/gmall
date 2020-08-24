@@ -1,10 +1,13 @@
 package com.atguigu.gmall.pms.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -44,5 +47,11 @@ public class AttrGroupEntity implements Serializable {
 	 * 备注
 	 */
 	private String remark;
+
+	/**
+	 * 新增属性 配置
+	 */
+	@TableField(exist = false) //数据库表中不存在此字段
+	private List<AttrEntity> attrEntities;
 
 }
