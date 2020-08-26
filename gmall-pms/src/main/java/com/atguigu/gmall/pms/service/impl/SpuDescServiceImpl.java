@@ -34,7 +34,7 @@ public class SpuDescServiceImpl extends ServiceImpl<SpuDescMapper, SpuDescEntity
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void saveSpuDesc(SpuVo spuVo, Long spuId) {
         List<String> spuImages = spuVo.getSpuImages();
         if(!CollectionUtils.isEmpty(spuImages)){
