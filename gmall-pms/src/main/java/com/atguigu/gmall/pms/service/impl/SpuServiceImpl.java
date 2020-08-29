@@ -1,6 +1,9 @@
 package com.atguigu.gmall.pms.service.impl;
 
-import com.atguigu.gmall.pms.entity.*;
+import com.atguigu.gamll.pms.entity.SkuAttrValueEntity;
+import com.atguigu.gamll.pms.entity.SkuImagesEntity;
+import com.atguigu.gamll.pms.entity.SpuAttrValueEntity;
+import com.atguigu.gamll.pms.entity.SpuEntity;
 import com.atguigu.gmall.pms.feign.GmallSmsClient;
 import com.atguigu.gmall.pms.mapper.SkuMapper;
 import com.atguigu.gmall.pms.mapper.SpuDescMapper;
@@ -26,8 +29,6 @@ import com.atguigu.gmall.common.bean.PageResultVo;
 import com.atguigu.gmall.common.bean.PageParamVo;
 
 import com.atguigu.gmall.pms.mapper.SpuMapper;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 
@@ -163,9 +164,9 @@ public class SpuServiceImpl extends ServiceImpl<SpuMapper, SpuEntity> implements
             List<SpuAttrValueEntity> spuAttrValueEntities = baseAttrs.stream().map(spuAttrValueVo -> {
                 SpuAttrValueEntity spuAttrValueEntity = new SpuAttrValueEntity();
                 BeanUtils.copyProperties(spuAttrValueVo, spuAttrValueEntity);
-                spuAttrValueEntity.setAttrId(null);
                 spuAttrValueEntity.setSpuId(spuId);
                 spuAttrValueEntity.setSort(1);
+                spuAttrValueEntity.setId(null);
                 return spuAttrValueEntity;
             }).collect(Collectors.toList());
 

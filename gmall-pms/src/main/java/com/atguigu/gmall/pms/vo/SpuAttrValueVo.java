@@ -1,11 +1,9 @@
 package com.atguigu.gmall.pms.vo;
 
-import com.atguigu.gmall.pms.entity.SpuAttrValueEntity;
-import lombok.Data;
+import com.atguigu.gamll.pms.entity.SpuAttrValueEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SpuAttrValueVo extends SpuAttrValueEntity {

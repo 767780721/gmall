@@ -1,7 +1,8 @@
 package com.atguigu.gmall.pms.vo;
 
-import com.atguigu.gmall.pms.entity.SkuAttrValueEntity;
-import com.atguigu.gmall.pms.entity.SkuEntity;
+
+import com.atguigu.gamll.pms.entity.SkuAttrValueEntity;
+import com.atguigu.gamll.pms.entity.SkuEntity;
 import lombok.Data;
 
 import java.math.BigDecimal;
