@@ -14,6 +14,7 @@ import com.atguigu.gmall.pms.vo.SpuVo;
 import com.atguigu.gmall.sms.vo.SkuSalesVo;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,6 +87,9 @@ public class SpuServiceImpl extends ServiceImpl<SpuMapper, SpuEntity> implements
     @Autowired
     private SpuDescService spuDescService;
 
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     @GlobalTransactional
     @Override
     public void bigSave(SpuVo spuVo) {
@@ -102,6 +106,7 @@ public class SpuServiceImpl extends ServiceImpl<SpuMapper, SpuEntity> implements
         //2.sku相关信息表保存 pms_sku pms_sku_images pms_sku_attr_value
         saveSku(spuVo, spuId);
 
+        rabbitTemplate.convertAndSend("PMS_SPU_EXCHANGE","item.insert",spuId);
 //        int i = 1/0;
     }
 
