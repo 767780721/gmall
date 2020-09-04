@@ -37,5 +37,8 @@ public interface GmallPmsApi {
 
     @GetMapping("pms/category/parent/{parentId}")
     public ResponseVo<List<CategoryEntity>> queryCategoriesByPid(@PathVariable("parentId") Long pid);
+
+    @GetMapping("pms/category/subs/{pid}")
+    public ResponseVo<List<CategoryEntity>> queryCategoriesWithSubByPid(@PathVariable("pid")Long pid);
 }
 

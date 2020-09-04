@@ -1,0 +1,38 @@
+package com.atguigu.gmall.index.utils;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+
+@Component
+public class DistributedLock {
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    public Boolean tryLock(String lockName,String uuid,Long expire){
+        String script = "if (redis.call('exists', KEYS[1]) == 0 or redis.call('hexists', KEYS[1], ARGV[1])==1) then redis.call('hincrby', KEYS[1], ARGV[1], 1) redis.call('expire', KEYS[1], ARGV[2]) return 1 else return 0 end";
+        Boolean flag = redisTemplate.execute(new DefaultRedisScript<>(script, Boolean.class), Arrays.asList(lockName), uuid, String.valueOf(expire));
+        if(!flag) {
+            //如果获取锁失败则重试
+            try {
+                Thread.sleep(50);
+                tryLock(lockName, uuid, expire);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public void unlock(String lockName,String uuid){
+        String script = "if redis.call('hexists', KEYS[1], ARGV[1]) == 0 then return nil end if (redis.call('hincrby', KEYS[1], ARGV[1], -1) > 0) then return 0 else redis.call('del', KEYS[1]) return 1 end";
+        Boolean flag = redisTemplate.execute(new DefaultRedisScript<>(script, Boolean.class), Arrays.asList(lockName), uuid);
+        if(flag == null){
+            throw new RuntimeException("您在尝试解除别人的锁: " + lockName + ", uuid: " + uuid);
+        }
+    }
+}

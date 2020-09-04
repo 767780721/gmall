@@ -18,4 +18,5 @@ public class GmallPmsApplication {
         SpringApplication.run(GmallPmsApplication.class, args);
     }
 
+
 }

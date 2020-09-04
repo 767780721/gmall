@@ -1,10 +1,13 @@
 package com.atguigu.gamll.pms.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -48,5 +51,9 @@ public class CategoryEntity implements Serializable {
 	 * 计量单位
 	 */
 	private String unit;
+
+	@TableField(exist = false) //数据库中不存在的字段
+	private List<CategoryEntity> subs;
+
 
 }
