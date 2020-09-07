@@ -1,14 +1,13 @@
 package com.atguigu.gamll.pms.api;
 
 import com.atguigu.gamll.pms.entity.*;
+import com.atguigu.gamll.pms.vo.GroupVo;
+import com.atguigu.gamll.pms.vo.SaleAttrValueVo;
 import com.atguigu.gmall.common.bean.PageParamVo;
 import com.atguigu.gmall.common.bean.PageResultVo;
 import com.atguigu.gmall.common.bean.ResponseVo;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +39,39 @@ public interface GmallPmsApi {
 
     @GetMapping("pms/category/subs/{pid}")
     public ResponseVo<List<CategoryEntity>> queryCategoriesWithSubByPid(@PathVariable("pid")Long pid);
+
+    @GetMapping("pms/sku/{id}")
+    public ResponseVo<SkuEntity> querySkuById(@PathVariable("id") Long id);
+
+    //查询sku的所有分类
+    @GetMapping("pms/category/all/{cid}")
+    public ResponseVo<List<CategoryEntity>> queryAllCategoriesByCid3(@PathVariable("cid")Long cid);
+
+    //根据skuId查询sku图片信息
+    @GetMapping("pms/skuimages/sku/{skuId}")
+    public ResponseVo<List<SkuImagesEntity>> queryImagesBuSkuId(@PathVariable("skuId")Long skuId);
+
+    //根据spuId查询spu下所有sku的销售属性组合
+    @GetMapping("pms/skuattrvalue/spu/{spuId}")
+    public ResponseVo<List<SaleAttrValueVo>> querySaleAttrVoBySpuId(@PathVariable("spuId")Long spuId);
+
+    //根据spuId查询spu下所有销售属性组合和skuId的映射关系
+    @GetMapping("pms/skuattrvalue/spu/sku/{spuId}")
+    public ResponseVo<String> querySaleAttrValuesMappingSkuIdBySpuId(@PathVariable("spuId")Long spuId);
+
+    //根据spuId查询spu的海报信息列表
+    @GetMapping("pms/spudesc/{spuId}")
+    public ResponseVo<SpuDescEntity> querySpuDescById(@PathVariable("spuId") Long spuId);
+
+    //根据skuId查询当前sku的销售属性
+    @GetMapping("pms/skuattrvalue/sku/sale/{skuId}")
+    public ResponseVo<List<SkuAttrValueEntity>> querySaleAttrValuesBySkuId(@PathVariable("skuId")Long skuId);
+
+    @GetMapping("pms/attrgroup/cid/{cid}")
+    public ResponseVo<List<GroupVo>> queryGroupVoByCidAndSpuIdAndSkuId(
+            @PathVariable("cid")Long cid,
+            @RequestParam("spuId")Long spuId,
+            @RequestParam("skuId")Long skuId
+    );
 }
 

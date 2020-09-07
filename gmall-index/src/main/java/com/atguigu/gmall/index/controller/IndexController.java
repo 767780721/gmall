@@ -43,4 +43,32 @@ public class IndexController {
         indexService.testLock();
         return ResponseVo.ok();
     }
+
+    @GetMapping("index/test/read")
+    @ResponseBody
+    public ResponseVo<Object> testRead(){
+        indexService.testRead();
+        return ResponseVo.ok("读取成功！！！");
+    }
+
+    @GetMapping("index/test/write")
+    @ResponseBody
+    public ResponseVo<Object> testWrite(){
+        indexService.testWrite();
+        return ResponseVo.ok("写入成功！！！");
+    }
+
+    @GetMapping("index/test/countdown")
+    @ResponseBody
+    public ResponseVo<Object> testCoundDown(){
+        indexService.testCoundDown();
+        return ResponseVo.ok("出来了一位同学！！！");
+    }
+
+    @GetMapping("index/test/latch")
+    @ResponseBody
+    public ResponseVo<Object> testLatch(){
+        indexService.testLatch();
+        return ResponseVo.ok("班长锁门了！！！");
+    }
 }

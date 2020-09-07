@@ -5,4 +5,8 @@
     <select id="querySearchAttrValuesBySkuId" resultType="com.atguigu.gamll.pms.entity.SkuAttrValueEntity">
         SELECT * FROM pms_attr a INNER JOIN pms_sku_attr_value b ON a.id=b.attr_id WHERE a.search_type=1 and b.sku_id=#{skuId};
     </select>
+
+    <select id="querySaleAttrValuesMappingSkuIdBySpuId" resultType="java.util.Map">
+        SELECT GROUP_CONCAT(attr_value ORDER BY attr_id) as attrvalues,a.sku_id FROM pms_sku_attr_value a INNER JOIN pms_sku b on a.sku_id = b.id WHERE b.spu_id = #{spuId} GROUP BY sku_id
+    </select>
 </mapper>

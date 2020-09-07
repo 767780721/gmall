@@ -13,6 +13,8 @@ public class DistributedLock {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    private Thread thread;
+
     public Boolean tryLock(String lockName,String uuid,Long expire){
         String script = "if (redis.call('exists', KEYS[1]) == 0 or redis.call('hexists', KEYS[1], ARGV[1])==1) then redis.call('hincrby', KEYS[1], ARGV[1], 1) redis.call('expire', KEYS[1], ARGV[2]) return 1 else return 0 end";
         Boolean flag = redisTemplate.execute(new DefaultRedisScript<>(script, Boolean.class), Arrays.asList(lockName), uuid, String.valueOf(expire));
@@ -25,6 +27,7 @@ public class DistributedLock {
                 e.printStackTrace();
             }
         }
+        renewTime(lockName,expire);
         return true;
     }
 
@@ -34,5 +37,21 @@ public class DistributedLock {
         if(flag == null){
             throw new RuntimeException("您在尝试解除别人的锁: " + lockName + ", uuid: " + uuid);
         }
+        thread.interrupt();
+    }
+
+    //自动续期
+    private void renewTime(String lockName,Long expire){
+        String script = "if redis.call('exists', KEYS[1]) == 1 then return redis.call('expire', KEYS[1], ARGV[1]) else return 0 end";
+        thread = new Thread(() -> {
+            while (redisTemplate.execute(new DefaultRedisScript<>(script,Boolean.class),Arrays.asList(lockName),expire.toString())){
+                try {
+                    Thread.sleep(expire * 1000 * 2 / 3);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 }

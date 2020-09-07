@@ -12,6 +12,8 @@ import com.atguigu.gmall.common.bean.PageParamVo;
 import com.atguigu.gmall.pms.mapper.CategoryMapper;
 import com.atguigu.gmall.pms.service.CategoryService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -34,6 +36,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, CategoryEnt
     @Override
     public List<CategoryEntity> queryCategoriesWithSubByPid(Long pid) {
         return categoryMapper.queryCategoriesWithSubByPid(pid);
+    }
+
+    @Override
+    public List<CategoryEntity> queryAllCategoriesByCid3(Long cid) {
+        //查询三级分类
+        CategoryEntity levelThreeCat = this.getById(cid);
+        if(levelThreeCat != null){
+            //查询二级分类
+            CategoryEntity levelTwoCat = this.getById(levelThreeCat.getParentId());
+            //查询一级分类
+            CategoryEntity levelOneCat = this.getById(levelTwoCat.getParentId());
+
+            return Arrays.asList(levelOneCat,levelTwoCat,levelThreeCat);
+        }
+        return null;
     }
 
 }

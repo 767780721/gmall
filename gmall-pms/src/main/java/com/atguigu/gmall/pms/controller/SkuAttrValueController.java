@@ -3,6 +3,8 @@ package com.atguigu.gmall.pms.controller;
 import java.util.List;
 
 import com.atguigu.gamll.pms.entity.SkuAttrValueEntity;
+import com.atguigu.gamll.pms.vo.SaleAttrValueVo;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,26 @@ public class SkuAttrValueController {
     @Autowired
     private SkuAttrValueService skuAttrValueService;
 
-    @GetMapping("sku{skuId}")
+    @GetMapping("spu/sku/{spuId}")
+    public ResponseVo<String> querySaleAttrValuesMappingSkuIdBySpuId(@PathVariable("spuId")Long spuId){
+        String json = skuAttrValueService.querySaleAttrValuesMappingSkuIdBySpuId(spuId);
+        return ResponseVo.ok(json);
+
+    }
+
+    @GetMapping("spu/{spuId}")
+    public ResponseVo<List<SaleAttrValueVo>> querySaleAttrVoBySpuId(@PathVariable("spuId")Long spuId){
+        List<SaleAttrValueVo> saleAttrValueVos = skuAttrValueService.querySaleAttrVoBySpuId(spuId);
+        return ResponseVo.ok(saleAttrValueVos);
+    }
+
+    @GetMapping("sku/sale/{skuId}")
+    public ResponseVo<List<SkuAttrValueEntity>> querySaleAttrValuesBySkuId(@PathVariable("skuId")Long skuId){
+        List<SkuAttrValueEntity> skuAttrValueEntities = skuAttrValueService.list(new QueryWrapper<SkuAttrValueEntity>().eq("sku_id", skuId));
+        return ResponseVo.ok(skuAttrValueEntities);
+    }
+
+    @GetMapping("sku/{skuId}")
     public ResponseVo<List<SkuAttrValueEntity>> querySearchAttrValuesBySkuId(@PathVariable("skuId")Long skuId){
         List<SkuAttrValueEntity> skuAttrValueEntities = skuAttrValueService.querySearchAttrValuesBySkuId(skuId);
 
