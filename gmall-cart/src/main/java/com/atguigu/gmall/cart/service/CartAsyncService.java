@@ -24,4 +24,14 @@ public class CartAsyncService {
     public void addCart(Cart cart){
         cartMapper.insert(cart);
     }
+
+    @Async
+    public void deleteCateByUserId(String userKey) {
+        cartMapper.delete(new UpdateWrapper<Cart>().eq("user_id",userKey));
+    }
+
+    @Async
+    public void deleteCateByUserIdAndSkuId(String userId,Long skuId){
+        cartMapper.delete(new UpdateWrapper<Cart>().eq("user_id",userId).eq("sku_id",skuId));
+    }
 }

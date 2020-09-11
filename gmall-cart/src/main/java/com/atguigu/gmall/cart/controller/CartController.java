@@ -3,17 +3,17 @@ package com.atguigu.gmall.cart.controller;
 import com.atguigu.gmall.cart.interceptor.LoginInterceptor;
 import com.atguigu.gmall.cart.pojo.Cart;
 import com.atguigu.gmall.cart.service.CartService;
+import com.atguigu.gmall.common.bean.ResponseVo;
 import com.atguigu.gmall.common.exception.CartException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -42,6 +42,36 @@ public class CartController {
         Cart cart = cartService.queryCartBySkuId(skuId);
         model.addAttribute("cart",cart);
         return "addCart";
+    }
+
+    @GetMapping("cart.html")
+    public String queryCartsByUserId(Model model){
+        List<Cart> carts = cartService.queryCartsByUserId();
+        model.addAttribute("carts",carts);
+        return "cart";
+    }
+
+    @PostMapping("updateNum")
+    @ResponseBody
+    public ResponseVo<Object> updateNum(@RequestBody Cart cart){
+        cartService.updateNum(cart);
+        return ResponseVo.ok();
+
+    }
+
+    @PostMapping("updateStatus")
+    @ResponseBody
+    public ResponseVo<Object> updateStatus(@RequestBody Cart cart){
+        cartService.updateStatus(cart);
+        return ResponseVo.ok();
+
+    }
+
+    @PostMapping("deleteCart")
+    @ResponseBody
+    public ResponseVo<Object> deleteCart(@RequestParam("skuId")Long skuId){
+        cartService.deleteCart(skuId);
+        return ResponseVo.ok();
     }
 
  /*   @GetMapping("test")

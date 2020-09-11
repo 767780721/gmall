@@ -31,8 +31,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -56,6 +58,8 @@ public class CartService {
     private final static ObjectMapper MAPPER = new ObjectMapper();//也可以使用
 
     private static final String KEY_PREFIX = "cart:info:";
+
+    private static final String PRICE_PREFIX = "cart:price:";
 
     public void addCart(Cart cart) {
         //1.组装key
@@ -106,7 +110,10 @@ public class CartService {
 
             //选中状态
             cart.setCheck(true);
+
             cartAsyncService.addCart(cart);
+            redisTemplate.opsForValue().set(PRICE_PREFIX + skuId,skuEntity.getPrice().toString());
+
         }
         hashOps.put(skuId,JSON.toJSONString(cart));
 
@@ -138,6 +145,79 @@ public class CartService {
     }
 
 
+    public List<Cart> queryCartsByUserId() {
+        //1.从redis中查询 userKey 未登录状态的购物车
+        UserInfo userInfo = LoginInterceptor.getUserInfo();
+        String userKey = userInfo.getUserKey();
+        String unloginKey = KEY_PREFIX + userKey;
+        //获取未登录的购物车
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(unloginKey);
+        List<Object> values = hashOps.values();
+        List<Cart> unLoginCarts = null;
+        if(!CollectionUtils.isEmpty(values)){
+            unLoginCarts = values.stream().map(cartJson -> {
+                try {
+                    Cart cart = MAPPER.readValue(cartJson.toString(), Cart.class);
+                    cart.setCurrentPrice(new BigDecimal(redisTemplate.opsForValue().get(PRICE_PREFIX + cart.getSkuId().toString())));
+                    return cart;
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }).collect(Collectors.toList());
+        }
+        //2. 获取userId 判断userId是否为空
+        Long userId = userInfo.getUserId();
+        if(userId == null){
+            return unLoginCarts;
+        }
+        //3. 合并购物车
+        String loginKey = KEY_PREFIX + userId;
+        BoundHashOperations<String, Object, Object> loginHashOps = redisTemplate.boundHashOps(loginKey);
+        if(!CollectionUtils.isEmpty(unLoginCarts)){
+            unLoginCarts.forEach(cart -> {
+                try {
+                    if(loginHashOps.hasKey(cart.getSkuId().toString())){
+                        //包含，更新数量
+                        BigDecimal count = cart.getCount();
+                        String cartJson = loginHashOps.get(cart.getSkuId().toString()).toString();
+                        cart = MAPPER.readValue(cartJson, Cart.class);
+                        cart.setCount(cart.getCount().add(count));
+                        cartAsyncService.updateByUserIdAndSkuId(cart);
+                    } else {
+                        //不包含, 新增
+                        cart.setUserId(userId.toString());
+                        cartAsyncService.addCart(cart);
+                    }
+                    loginHashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        //4. 删除未登录状态购物车
+        redisTemplate.delete(unloginKey);
+        cartAsyncService.deleteCateByUserId(userKey);
+
+        //5.查询登录状态购物车
+        List<Object> cartJsons = loginHashOps.values();
+        if(!CollectionUtils.isEmpty(cartJsons)){
+            return cartJsons.stream().map(cartJson -> {
+                try {
+                    Cart cart = MAPPER.readValue(cartJson.toString(), Cart.class);
+                    cart.setCurrentPrice(new BigDecimal(redisTemplate.opsForValue().get(PRICE_PREFIX + cart.getSkuId().toString())));
+                    return cart;
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }).collect(Collectors.toList());
+        }
+
+        return null;
+    }
+
     @Async
     public void executor1(){
         try {
@@ -158,6 +238,60 @@ public class CartService {
             System.out.println("异步方法executor2结束执行");
         } catch (InterruptedException e) {
             System.out.println("service方法捕获异常后的打印: " + e.getMessage());
+        }
+    }
+
+    public void updateNum(Cart cart) {
+
+        String userId = getUserId();
+        String key = KEY_PREFIX + userId;
+
+        //获取该用户的购物车操作对象
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(key);
+        if(hashOps.hasKey(cart.getSkuId().toString())){
+            try {
+                BigDecimal count = cart.getCount();
+                String cartJson = hashOps.get(cart.getSkuId().toString()).toString();
+                cart = MAPPER.readValue(cartJson, Cart.class);
+                cart.setCount(count);
+
+                hashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
+                cartAsyncService.updateByUserIdAndSkuId(cart);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void deleteCart(Long skuId) {
+        String userId = getUserId();
+        String key = KEY_PREFIX + userId;
+
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(key);
+        if(hashOps.hasKey(skuId.toString())){
+            hashOps.delete(skuId.toString());
+            cartAsyncService.deleteCateByUserIdAndSkuId(userId,skuId);
+        }
+    }
+
+    public void updateStatus(Cart cart) {
+        String userId = getUserId();
+        String key = KEY_PREFIX + userId;
+
+        //获取该用户的购物车操作对象
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(key);
+        if(hashOps.hasKey(cart.getSkuId().toString())){
+            try {
+                Boolean check = cart.getCheck();
+                String cartJson = hashOps.get(cart.getSkuId().toString()).toString();
+                cart = MAPPER.readValue(cartJson, Cart.class);
+                cart.setCheck(check);
+
+                hashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
+                cartAsyncService.updateByUserIdAndSkuId(cart);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 
