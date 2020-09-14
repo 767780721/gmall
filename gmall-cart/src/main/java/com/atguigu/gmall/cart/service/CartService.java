@@ -1,8 +1,6 @@
 package com.atguigu.gmall.cart.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.atguigu.gamll.pms.api.GmallPmsApi;
 import com.atguigu.gamll.pms.entity.SkuAttrValueEntity;
 import com.atguigu.gamll.pms.entity.SkuEntity;
 import com.atguigu.gamll.wms.entity.WareSkuEntity;
@@ -10,29 +8,22 @@ import com.atguigu.gmall.cart.feign.GmallPmsClient;
 import com.atguigu.gmall.cart.feign.GmallSmsClient;
 import com.atguigu.gmall.cart.feign.GmallWmsClient;
 import com.atguigu.gmall.cart.interceptor.LoginInterceptor;
-import com.atguigu.gmall.cart.mapper.CartMapper;
 import com.atguigu.gmall.cart.pojo.Cart;
-import com.atguigu.gmall.cart.pojo.UserInfo;
+import com.atguigu.gmall.common.bean.UserInfo;
 import com.atguigu.gmall.common.bean.ResponseVo;
 import com.atguigu.gmall.common.exception.CartException;
 import com.atguigu.gmall.sms.vo.ItemSaleVo;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -79,7 +70,7 @@ public class CartService {
             cart = JSON.parseObject(cartJson, Cart.class);
             cart.setCount(cart.getCount().add(count));
             //写回数据库
-            cartAsyncService.updateByUserIdAndSkuId(cart);
+            cartAsyncService.updateByUserIdAndSkuId(userId,cart);
         } else {
             //无则新增新的记录
             cart.setUserId(userId);
@@ -111,7 +102,7 @@ public class CartService {
             //选中状态
             cart.setCheck(true);
 
-            cartAsyncService.addCart(cart);
+            cartAsyncService.addCart(userId,cart);
             redisTemplate.opsForValue().set(PRICE_PREFIX + skuId,skuEntity.getPrice().toString());
 
         }
@@ -183,11 +174,11 @@ public class CartService {
                         String cartJson = loginHashOps.get(cart.getSkuId().toString()).toString();
                         cart = MAPPER.readValue(cartJson, Cart.class);
                         cart.setCount(cart.getCount().add(count));
-                        cartAsyncService.updateByUserIdAndSkuId(cart);
+                        cartAsyncService.updateByUserIdAndSkuId(userId.toString(),cart);
                     } else {
                         //不包含, 新增
                         cart.setUserId(userId.toString());
-                        cartAsyncService.addCart(cart);
+                        cartAsyncService.addCart(userId.toString(),cart);
                     }
                     loginHashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
                 } catch (JsonProcessingException e) {
@@ -256,7 +247,7 @@ public class CartService {
                 cart.setCount(count);
 
                 hashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
-                cartAsyncService.updateByUserIdAndSkuId(cart);
+                cartAsyncService.updateByUserIdAndSkuId(userId,cart);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -288,12 +279,24 @@ public class CartService {
                 cart.setCheck(check);
 
                 hashOps.put(cart.getSkuId().toString(),MAPPER.writeValueAsString(cart));
-                cartAsyncService.updateByUserIdAndSkuId(cart);
+                cartAsyncService.updateByUserIdAndSkuId(userId,cart);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    public List<Cart> queryCheckedCarts(Long userId) {
+        String key = KEY_PREFIX + userId.toString();
+        BoundHashOperations<String, Object, Object> hashOps = redisTemplate.boundHashOps(key);
+        List<Object> cartJsons = hashOps.values();
+        if(CollectionUtils.isEmpty(cartJsons)){
+            return null;
+        }
+        return cartJsons.stream().map(cartJson -> JSON.parseObject(cartJson.toString(),Cart.class)).filter(cart -> cart.getCheck()).collect(Collectors.toList());
+    }
+
+
 
   /*  @Async
     public ListenableFuture<String> executor1(){

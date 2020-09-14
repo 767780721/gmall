@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.gmall.wms.mapper.WareSkuMapper">
+    <update id="lock">
+        UPDATE wms_ware_sku set stock_locked = stock_locked + #{count} WHERE id = #{id};
+    </update>
 
+    <update id="unLock">
+         UPDATE wms_ware_sku set stock_locked = stock_locked - #{count} WHERE id = #{id};
+    </update>
+
+    <update id="minus">
+        UPDATE wms_ware_sku set stock = stock - #{count},stock_locked = stock_locked - #{count},sales = sales + #{count} WHERE id = #{id};
+    </update>
+
+
+    <select id="checkLock" resultType="com.atguigu.gamll.wms.entity.WareSkuEntity">
+        SELECT * FROM wms_ware_sku WHERE sku_id=#{skuId} AND stock-stock_locked>#{count};
+    </select>
 </mapper>

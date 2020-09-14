@@ -14,20 +14,22 @@ public class CartAsyncService {
     private CartMapper cartMapper;
 
     @Async
-    public void updateByUserIdAndSkuId(Cart cart){
+    public void updateByUserIdAndSkuId(String userId,Cart cart){
+        int i = 1/0;
         cartMapper.update(cart,new UpdateWrapper<Cart>()
                 .eq("user_id",cart.getUserId())
                 .eq("sku_id",cart.getSkuId()));
     }
 
     @Async
-    public void addCart(Cart cart){
+    public void addCart(String userId,Cart cart){
+        int i = 1/0;
         cartMapper.insert(cart);
     }
 
     @Async
-    public void deleteCateByUserId(String userKey) {
-        cartMapper.delete(new UpdateWrapper<Cart>().eq("user_id",userKey));
+    public void deleteCateByUserId(String userId) {
+        cartMapper.delete(new UpdateWrapper<Cart>().eq("user_id",userId));
     }
 
     @Async

@@ -34,6 +34,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
     @GetMapping("query")
     public ResponseVo<UserEntity> queryUser(
             @RequestParam("loginName")String loginName,
@@ -73,12 +74,12 @@ public class UserController {
 
     /**
      * 信息
+     * 包含积分信息
      */
     @GetMapping("{id}")
     @ApiOperation("详情查询")
     public ResponseVo<UserEntity> queryUserById(@PathVariable("id") Long id){
 		UserEntity user = userService.getById(id);
-
         return ResponseVo.ok(user);
     }
 
